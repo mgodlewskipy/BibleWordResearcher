@@ -59,10 +59,17 @@ class NewAppWindow:
     
     def result_self_window(self, text, translated):
         def refresh():
-            pass
+            try:
+                meaning_label1.config(text=f"{text[self.current_page][0]}\n{self.search_field.get().title()}")
+                result_scroll1.delete("1.0", "end")
+                translate_scroll1.delete("1.0", "end")
+                result_scroll1.insert("end", text[self.current_page][1])
+                translate_scroll1.insert("end", translated[self.current_page])
+            except IndexError:
+                meaning_label1.config(text="Brak")
 
         def next_page():
-            if not self.current_page + 1 > len(text) + 1:
+            if not self.current_page + 1 > len(text) - 1:
                 self.current_page += 1
                 refresh()
 
@@ -77,22 +84,28 @@ class NewAppWindow:
         result_page.config(padx=20, bg="#F0F8FF")
         result_page.title("Bible Dictionary")
 
-        meaning_label1 = Label(result_page, bg="#F0F8FF", font=("Arial", 15, "bold italic"))
+        meaning_label1 = Label(result_page, bg="#F0F8FF", font=("Arial", 11, "bold italic"))
         result_scroll1 = ScrolledText(result_page, width=50, height=10, bd=0, font=("Arial", 8, "normal"),
                                       wrap="word")
         translate_label1 = Label(result_page, text="Tłumaczenie", bg="#F0F8FF", font=("Arial", 11, "italic bold"))
         translate_scroll1 = ScrolledText(result_page, width=50, height=10, bd=0, font=("Arial", 8, "normal"),
                                          wrap="word")
 
-        next_button = ttk.Button(result_page, style="TButton", text="Nas")
+        next_button = ttk.Button(result_page, style="TButton", text="Następna Strona", command=next_page)
+        previous_button = ttk.Button(result_page, style="TButton", text="Poprzednia Strona", command=previous_page)
 
         meaning_label1.grid(row=0, column=0, pady=15, columnspan=2)
         result_scroll1.grid(row=1, column=0, columnspan=2, pady=7)
         translate_label1.grid(row=2, column=0, columnspan=2, pady=7)
         translate_scroll1.grid(row=3, column=0, columnspan=2, pady=15)
+        next_button.grid(row=4, column=1, pady=15)
+        previous_button.grid(row=4, column=0, pady=15)
 
-        def close_win(e):
+        refresh()
+
+        def close_win():
             result_page.destroy()
             self.window.deiconify()
 
-        result_page.bind('<Escape>', lambda e: close_win(e))
+        result_page.protocol("WM_DELETE_WINDOW", close_win)
+        result_page.bind('<Escape>', close_win)
