@@ -1,3 +1,4 @@
+import deep_translator.exceptions
 from bs4 import BeautifulSoup
 import requests
 from deep_translator import GoogleTranslator
@@ -25,12 +26,17 @@ class SearchInDict:
         finded_txt = [text.get_text() for text in text_list if text_list.index(text) in index]
 
         results = []
-
-        for title in finded_titles:
-            results.append([title, finded_txt[finded_titles.index(title)]])
+        try:
+            for title in finded_titles:
+                results.append([title, finded_txt[finded_titles.index(title)]])
+        except IndexError:
+            results.append(["Brak wyników", ""])
 
         return results
 
     def translate(self):
         translator = GoogleTranslator(source="en", target="pl")
-        return [translator.translate(text[1]) for text in self.result_in_en]
+        try:
+            return [translator.translate(text[1]) for text in self.result_in_en]
+        except deep_translator.exceptions.NotValidPayload:
+            return ["Tłumacz przyjmuje maksymalnie 5000 znaków" for _ in range(len(self.result_in_en))]
